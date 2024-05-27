@@ -1,6 +1,7 @@
 #!/usr/bin/env php
 <?php
 use GuzzleHttp\Client;
+use Nette\Utils\FileSystem;
 
 /*
  *---------------------------------------------------------------
@@ -39,6 +40,23 @@ define('ROOT_PATH', __DIR__ . DS);
 define('APP_PATH', ROOT_PATH . 'src' . DS);
 define('POST_PATH', APP_PATH . 'lib/posts' . DS);
 
-$config = parse_ini_file(__DIR__ . '/config.ini');
+require_once ROOT_PATH . 'vendor/autoload.php';
+
+$config = parse_ini_file(__DIR__ . '/config.ini', true);
 
 $client = new Client();
+
+$backendUrl = $config['backend']['url'];
+$endpoint = "https://public-api.wordpress.com/rest/v1.1/sites/$backendUrl/posts/";
+
+$posts = $client->get($endpoint);
+$posts = json_decode($posts->getBody()->getContents(), true);
+
+$posts = $posts['posts'];
+
+foreach ($posts as $post) {
+    FileSystem::write(
+        POST_PATH . $post['slug'] . '.json',
+        json_encode($post)
+    );
+}
