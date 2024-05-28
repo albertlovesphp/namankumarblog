@@ -57,6 +57,6 @@ $posts = $posts['posts'];
 foreach ($posts as $post) {
     FileSystem::write(
         POST_PATH . $post['slug'] . '.json',
-        json_encode($post)
+        str_replace(json_encode('https://pmv.test'),'',json_encode($post))
     );
 }
